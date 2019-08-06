@@ -1,7 +1,7 @@
 # FlashCard Maker
 # Joshua Lee
-# Version 2
-# Last Edited: 8/5/19
+# Version 3
+# Last Edited: 8/6/19
 
 
 #               ==============IMPORT STATEMENTS=============
@@ -12,8 +12,21 @@ import random
 # import regex to find words and its corresponding definition when testing yourself
 import re
 
+#               ==============GLOBAL VARIABLES===============
+# path to the flashcard set directory
 path = os.getcwd()
 path += "/flashcards/"
+
+# dictionary of all FlashSets
+flashDict = {}
+flashDict[str(0)] = "0"
+number = 1
+
+for fileName in os.listdir(path):
+    if fileName.endswith(".txt"):
+        flashDict[str(number)] = fileName
+        number += 1
+
 
 # create a directory called flashcards to hold all the FlashCard Sets if not already created
 if not os.path.exists(path):
@@ -38,7 +51,8 @@ def intro():
 # Prompt 1 Selection 1: Create a New FlashCard Set
 def newSet():
     duplicate = False
-    name = raw_input("What would you like to name your new FlashCard Set? (add '.txt') ")
+    name = raw_input("What would you like to name your new FlashCard Set? (DON'T ADD '.txt') ")
+    name += ".txt"
     print ("Your new text file will be %s\n" % (name))
     filePath = path + name
 
@@ -77,7 +91,7 @@ def newSet():
                 elif (choice == '2'):
                     continue
 
-    # Creates a new file
+    # Creates a new filev
     filePtr = open(filePath, "w")
     filePtr.close()
     return name
@@ -87,27 +101,37 @@ def newSet():
 def chooseSets():
     # Print all existing sets
     print("These are the existing Sets: ")
-    for fileName in os.listdir(path):
+
+    # Associate each number to each set
+    number = 1
+
+    for fileName in flashDict.values():
         if fileName.endswith(".txt"):
-            print(fileName)
+            print(str(number) + ") " + fileName)
+            number += 1
 
     # Ask for which set to work on
     name = raw_input("\nWhich set would you like to work on? (include '.txt')\n"
-                     "If none, return 1 ")
+                     "If none, return 0 ")
     return name
 
 
-# Prompt 1 Selection 3: Delete a FlashCard Set
+# Prompt 1 Selection 3: List the FlashCard Sets and delete one
 def deleteSet():
     # Print all existing sets
     print("These are the existing Sets: ")
-    for fileName in os.listdir(path):
+
+    # Associate each number to each set
+    number = 1
+
+    for fileName in flashDict.values():
         if fileName.endswith(".txt"):
-            print(fileName)
+            print(str(number) + ") " + fileName)
+            number+= 1
 
     # Ask for which set to delete
-    name = raw_input("\nWhich set would you like to delete (include '.txt')\n"
-                     "If none, return 1\n")
+    name = raw_input("\nWhich set would you like to delete (select name or number)\n"
+                     "If none, return 0\n")
     return name
 
 
@@ -131,7 +155,7 @@ def readFile(fileName):
 
 # Prompt 2 Selection 2 Add to the File
 def addToFile(fileName):
-    openFile = open(fileName, "w")
+    openFile = open(fileName, "a")
 
     # While user wants to keep adding words, ask for word and its definition
     while (True):
@@ -176,6 +200,8 @@ def addToFile(fileName):
             openFile.close()
             break
 
+    openFile.close()
+
 
 # Prompt 2 Selection 3 Test yourself
 def testFile(fileName):
@@ -188,11 +214,17 @@ def testFile(fileName):
             wordDict[words[i]] = words[i + 1]
 
 
-    for i in range(len(words) / 2):
-        word, definition = random.choice(list(wordDict.items()))
-        print("The word is: " + word)
-        randomInput = raw_input("Enter any key when you are ready to see the definition")
+    items = wordDict.items()
+    random.shuffle(items)
+    print("For each word, enter what you think the definition is\n")
+    print("-----------------------------------------------------\n")
+    for word, definition in items:
+        print("The Word is: " + word)
+        randomInput = raw_input()
         print("The Definition is: " + definition + '\n')
+        print("--------------------------------------\n")
+
+    openFile.close()
 
 
 #               ===============MAIN METHOD=============
@@ -210,22 +242,36 @@ if __name__ == "__main__":
         # P1S2: choose an existing set
         elif (choice1 == '2'):
             fileName = chooseSets()
-            if (fileName == '1'):
+
+            if (fileName == '0'):
                 print("You chose to exit!")
                 continue
+
+            # If the input isn't a txt file, then check to see if the input is a key
+            if fileName in flashDict.keys():
+                fileName = flashDict[fileName]
 
         # P1S3: delete an existing set
         elif (choice1 == '3'):
             fileName = deleteSet()
 
-            if (fileName == '1'):
+            # If the input isn't a txt file, then check to see if the input is a key
+            if fileName in flashDict.keys():
+                fileName = flashDict[fileName]
+
+            # flashDict[0] = '0' so it'll still exit
+            if (fileName == '0'):
                 print("You chose to exit!")
 
             else:
-                try:
-                    os.remove(path + fileName)
-                except OSError:
-                    print ("Inputted file is invalid!")
+                confirm = raw_input("Are you sure?\n"
+                                "1) yes\n"
+                                "2) no, go back ")
+                if (confirm == '1'):
+                    try:
+                        os.remove(path + fileName)
+                    except OSError:
+                        print ("Inputted file is invalid!")
 
             continue
 
@@ -233,6 +279,9 @@ if __name__ == "__main__":
         elif (choice1 == '4'):
             print("Goodbye!")
             break
+
+        # If fileName doesn't end with .txt, then don't continue
+
 
         # If user created a new set or is using an existing one, it will go to the next prompt
         # While the user is still editing or using this file, continue to run
@@ -256,12 +305,14 @@ if __name__ == "__main__":
                 print("Exiting!")
                 break
 
+
 # Create a method that will check to see if an added word already exists and see if you want to
 # overwrite the old def with a new def, add to the new def, or create a separate def for the same word
 
-# Use regex to find word to definition
-# Create a dictionary of the words to test yourself
-# regex splits at each whitespace... would've done at each : but the each def would have the next word with it... right?
-#   wait but if you do whitespace then the definition with multiple words would be cut so its bad hm
-# make sure that it doesn't duplicate the same word to def,
 # specify if you want the word then get def, def then get word, multiple choice, etc.
+
+# be able to delete words in eaech set
+
+# when you want to delete a file, just input a number associated to it instead of having to type the name of the file (dicitonary)
+
+# make spacings (input and print) consistent and clean
