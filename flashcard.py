@@ -22,11 +22,50 @@ flashDict = {}
 flashDict[str(0)] = "0"
 number = 1
 
-for fileName in os.listdir(path):
+# will add all text files to the flash dictionary
+# sorted in alphabetical order
+# number has to be a string because user input is always a string
+for fileName in sorted(os.listdir(path)):
     if fileName.endswith(".txt"):
         flashDict[str(number)] = fileName
         number += 1
 
+
+# function to help update the fileDict when deleting files
+def deleteFromDict(fileName):
+    if fileName in flashDict.values():
+        try:
+            # Will find the wanted file and delete it from flashDict
+            for i in flashDict:
+                if flashDict[i] == fileName:
+                    flashDict.pop(str(i))
+                    break
+
+            num = 1
+            for filee in sorted(os.listdir(path)):
+                if filee.endswith(".txt"):
+                    flashDict[str(num)] = filee
+                    num += 1
+
+        except KeyError:
+            print("Key not found")
+
+# function to help update the fileDict when creating files
+def addToDict(fileName):
+    flashDict[str(len(flashDict))] = fileName
+    number = 1
+    for filee in sorted(os.listdir(path)):
+        if filee.endswith(".txt"):
+            flashDict[str(number)] = filee
+            number += 1
+
+    # renumber the dictionary in alphabetical order
+    """
+    for i in range(dictLength-1):
+        for j in range(i, dictLength-1):
+            if flashDict[str(i)] < flashDict[str(j)]:
+                flashDict[str(i)], flashDict[str(j)] = flashDict[str(j)], flashDict[str(i)]
+    """
 
 # create a directory called flashcards to hold all the FlashCard Sets if not already created
 if not os.path.exists(path):
@@ -42,8 +81,8 @@ def intro():
     print("\nHello! Welcome to FlashCard Maker!\n"
           "Would you like to:\n"
           "1) Create a New FlashCard Set\n"
-          "2) Look at existing FlashCard Set\n"
-          "3) Delete existing FlashCard Set\n"
+          "2) Work on an existing FlashCard Set\n"
+          "3) Delete an existing FlashCard Set\n"
           "4) Quit ")
     return raw_input()
 
@@ -91,9 +130,10 @@ def newSet():
                 elif (choice == '2'):
                     continue
 
-    # Creates a new filev
+    # Creates a new file
     filePtr = open(filePath, "w")
     filePtr.close()
+
     return name
 
 
@@ -105,9 +145,9 @@ def chooseSets():
     # Associate each number to each set
     number = 1
 
-    for fileName in flashDict.values():
+    for num, fileName in flashDict.items():
         if fileName.endswith(".txt"):
-            print(str(number) + ") " + fileName)
+            print(num + ") " + fileName)
             number += 1
 
     # Ask for which set to work on
@@ -238,6 +278,7 @@ if __name__ == "__main__":
         # P1S1: create a new set
         if (choice1 == '1'):
             fileName = newSet()
+            addToDict(fileName)
 
         # P1S2: choose an existing set
         elif (choice1 == '2'):
@@ -270,6 +311,7 @@ if __name__ == "__main__":
                 if (confirm == '1'):
                     try:
                         os.remove(path + fileName)
+                        deleteFromDict(fileName)
                     except OSError:
                         print ("Inputted file is invalid!")
 
