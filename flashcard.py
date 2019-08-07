@@ -1,7 +1,7 @@
 # FlashCard Maker
 # Joshua Lee
-# Version 3
-# Last Edited: 8/6/19
+# Version 4
+# Last Edited: 8/7/19
 
 
 #               ==============IMPORT STATEMENTS=============
