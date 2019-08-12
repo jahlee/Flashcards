@@ -1,7 +1,7 @@
 # FlashCard Maker
 # Joshua Lee
-# Version 6
-# Last Edited: 8/9/19
+# Version 7
+# Last Edited: 8/12/19
 
 
 #               ==============IMPORT STATEMENTS=============
@@ -86,7 +86,7 @@ def newSet():
     print ("Your new text file will be %s\n" % (name))
     filePath = path + name
 
-    # Will check to see if the inputted file name i already created
+    # Will check to see if the inputted file name is already created
     for fileName in os.listdir(path):
         if (name == fileName):
             duplicate = True
@@ -152,6 +152,7 @@ def chooseSets():
     return name
 
 
+
 # Prompt 1 Selection 3: Rename a FlashCard Set
 def renameSet():
     printSets()
@@ -189,11 +190,14 @@ def printWords(fileName):
     openFile = open(fileName, "r")
     # Use Regular Expression to differentiate between new word and its definition
     words = re.split(":|\n", openFile.read())
+    wordList = ["0"]
     wordDict = {}
-
     for i in range(len(words) - 1):
         if (i % 2 == 0):
-            wordDict[words[i]] = words[i + 1]
+            wordList.append(words[i])
+            wordDict[words[i]] = words[i+1]
+
+    wordList.sort()
 
     # It'll be the max chars long + 5 on each side
     # wordLength = max(len(key.split()) for key in wordDict.keys())
@@ -203,10 +207,11 @@ def printWords(fileName):
     print ("| {:<6s} | {:<25s} | {:<75s}|".format("INDEX", "WORD", "DEFINITION"))
     #print('-' * 101)
     print ("+ {:-<6s} + {:-<25s} + {:-<75s}+".format("-", "-", "-"))
-    index = 1
-    for word in wordDict:
-        print("| {:<6d} | {:<25s} | {:<75s}|".format(index, word, wordDict[word]))
-        print ("+ {:.<6s} + {:.<25s} + {:.<75s}+".format(".",".","."))
+
+    for index in range(1,len(wordList)):
+
+        print("| {:<6d} | {:<25s} | {:<75s}|".format(index, wordList[index], wordDict[wordList[index]]))
+        print("+ {:.<6s} + {:.<25s} + {:.<75s}+".format(".",".","."))
         #print('- ' * 51 + '-')
         #print("| {:<8s} | {:<20s} | {:<65s}|".format("","",""))
         index+=1
@@ -275,31 +280,54 @@ def deleteFromFile(fileName):
 
     openFile = open(fileName, "r")
     # Use Regular Expression to differentiate between new word and its definition
-    words = re.split(":|\n", openFile.read())
-    allWords = ["null"]
+    words = re.split(":|\n|''", openFile.read())
+    openFile.close()
 
+    wordList = ["0"]
+    wordDict = {}
     for i in range(len(words) - 1):
         if (i % 2 == 0):
-            allWords.append(words[i])
-    """
+            wordList.append(words[i])
+            wordDict[words[i]] = words[i + 1]
+
+    wordList.sort()
+
     # If the input isn't a txt file, then check to see if the input is a key
     # If it is not a number, then it is not a valid input
     # If it is not a string, then something got messed up somewhere
-    try:
-        if fileName in str(range(len(flashList))):
-            fileName = flashList[int(fileName)]
-    except ValueError:
-        print("Not a valid input!")
-        continue
-    except TypeError:
-        print("Wrong type!")
-        continue
-
     # flashList[0] = '0' so it'll still exit
-    if (fileName == '0'):
+    if (toDelete == '0'):
         print("You chose to exit!")
-    """
 
+    elif (toDelete in wordList):
+        # Gets all lines
+        with open(fileName, "r") as openFile:
+            lines = openFile.readlines()
+        # Will write all words in "lines" if the line isn't the one to delete
+        with open(fileName, "w") as openFile:
+            for line in lines:
+                if not line.lower().startswith(toDelete.lower()):
+                    openFile.write(line)
+        openFile.close()
+
+    else:
+        try:
+            if toDelete in str(range(len(wordList))):
+                toDelete = wordList[int(toDelete)]
+                # Gets all lines
+                with open(fileName, "r") as openFile:
+                    lines = openFile.readlines()
+                # Will write all words in "lines" if the line isn't the one to delete
+                with open(fileName, "w") as openFile:
+                    for line in lines:
+                        if not line.lower().startswith(toDelete.lower()):
+                            openFile.write(line)
+                openFile.close()
+            else:
+                print("Input does not exist")
+
+        except ValueError:
+            print("Not a valid input!")
 
 
 
@@ -308,7 +336,7 @@ def deleteFromFile(fileName):
 def testFile(fileName):
     openFile = open(fileName, "r")
     # Use Regular Expression to differentiate between new word and its definition
-    words = re.split(":|\n", openFile.read())
+    words = re.split(":|\n|''", openFile.read())
     wordDict = {}
 
     for i in range(len(words) - 1):
@@ -356,7 +384,6 @@ if __name__ == "__main__":
             if (fileName == '0'):
                 print("You chose to exit!")
                 continue
-
 
             # If the input isn't a txt file, then check to see if the input is a key
             # If it is not a number, then it is not a valid input
@@ -485,7 +512,7 @@ if __name__ == "__main__":
 
 # specify if you want the word then get def, def then get word, multiple choice, etc.
 
-# be able to delete words in each set
+# Deleting words might have some bugs
 
 # if you input the beginning of a file, then return all files that start with the same input
 # ex: if you input h then it'll output all files that start with h
@@ -509,3 +536,5 @@ if __name__ == "__main__":
 # it only checks for the number value
 # change it so that you just need to insert the name of the project
 # its better to take out .txt from print because it'd confused the user!!!
+
+# make everything case insensitive (for prompt 1 regarding files)
