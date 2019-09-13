@@ -1,7 +1,7 @@
 # FlashCard Maker
-# Joshua Lee
-# Version 7
-# Last Edited: 8/12/19
+# JLee
+# Version 8?
+# Last Edited: 9/13/19
 
 
 #               ==============IMPORT STATEMENTS=============
@@ -42,7 +42,6 @@ def deleteFromList(fileName):
         # Will find the wanted file if it exists and delete it from flashList
         try:
             flashList.remove(fileName)
-            print(fileName)
             flashList = sorted(flashList)
         except ValueError:
             print("Value not found!")
@@ -63,42 +62,51 @@ def updateList(oldFile, newFile):
 #               ===============PROMPT 1================
 # introduction + prompt 1
 def intro():
-    print("These are your current projects: ")
+    print("--------------------------------------------------------")
+    print("\nThese are your current existing projects: ")
     for f in flashList:
         if (f.endswith(".txt")):
             print(f[:-4])
 
     print("--------------------------------------------------------")
-    print("Would you like to:\n"
+    print("\nWould you like to:\n"
           "1) Create a New FlashCard Set\n"
           "2) Open an existing FlashCard Set\n"
           "3) Rename an existing FlashCard Set\n"
           "4) Delete an existing FlashCard Set\n"
-          "5) Quit ")
-    return raw_input()
+          "0) Quit")
+    return raw_input("Input: ")
 
 
 # Prompt 1 Selection 1: Create a New FlashCard Set
 def newSet():
     duplicate = False
-    name = raw_input("What would you like to name your new FlashCard Set? (DON'T ADD '.txt') ")
+    print("--------------------------------------------------------")
+    print("\nWhat would you like to name your new FlashCard Set?")
+    name = raw_input("Input: ")
     name += ".txt"
-    print ("Your new text file will be %s\n" % (name))
     filePath = path + name
 
     # Will check to see if the inputted file name is already created
     for fileName in os.listdir(path):
-        if (name == fileName):
+        if (name.lower() == fileName.lower()):
             duplicate = True
+            name = fileName
             break
 
     # If the file is already created
     if (duplicate):
+        # delete the duplicate it will create in flashList
+        deleteFromList(fileName)
+        
         while (True):
-            print("There seems to be a file already created with the name %s" % (name))
-            choice = raw_input("Do you want to\n"
-                               "1) Use the already created file\n"
-                               "2) Overwrite the file\n")
+
+            print("\nThere seems to be a file already created with the name '%s'" % (name[:-4]))
+            print("Do you want to:\n"
+                  "1) Use the already created file\n"
+                  "2) Overwrite the file")
+
+            choice = raw_input("Input: ")
 
             # Use the already created file
             if (choice == '1'):
@@ -108,9 +116,10 @@ def newSet():
             elif (choice == '2'):
 
                 # Make sure user wants to delete/overwrite the file
-                choice = raw_input("Are you sure?\n"
-                                   "1) Yes\n"
-                                   "2) No, go back ")
+                print("\nAre you sure?\n"
+                      "1) Yes\n"
+                      "2) No, go back")
+                choice = raw_input("Input: ")
 
                 # Delete the file
                 if (choice == '1'):
@@ -125,21 +134,24 @@ def newSet():
     # Creates a new file
     filePtr = open(filePath, "w")
     filePtr.close()
-
     return name
 
 
 # helper method that prints all the sets with its number/index next to it
 def printSets():
     # Print all existing sets
-    print("These are the existing Sets: ")
+    print("\nThese are the existing Sets: ")
 
     # Associate each number to each set
     number = 1
 
     for fileName in flashList:
         if fileName.endswith(".txt"):
-            print(str(number) + ") " + fileName[:-4])
+            # format it nicer because double digit numbers take two character spaces
+            if (number >= 10):
+                print(str(number) + ") " + fileName[:-4])
+            else:
+                print(" " + str(number) + ") " + fileName[:-4])
             number += 1
 
 # Prompt 1 Selection 2: List the FlashCard Sets and choose one
@@ -147,8 +159,9 @@ def chooseSets():
     printSets()
 
     # Ask for which set to work on
-    name = raw_input("\nWhich set would you like to open? (input name or number)\n"
-                     "If none, return 0 ")
+    print("\nWhich set would you like to open? (input name or number)\n"
+          "If none, return 0")
+    name = raw_input("Input: ")
     return name
 
 
@@ -158,9 +171,9 @@ def renameSet():
     printSets()
 
     # Ask for which set to rename
-    name = raw_input("\nWhich set would you like to rename? (input name or number)\n"
-                     "If none, return 0 ")
-
+    print("\nWhich set would you like to rename? (input name or number)\n"
+          "If none, return 0")
+    name = raw_input("Input: ")
     return name
 
 
@@ -169,21 +182,25 @@ def deleteSet():
     printSets()
 
     # Ask for which set to delete
-    name = raw_input("\nWhich set would you like to delete (input name or number)\n"
-                     "If none, return 0\n")
+    print("\nWhich set would you like to delete (input name or number)\n"
+          "If none, return 0")
+    name = raw_input("Input: ")
     return name
 
 
 #           ===============PROMPT 2===============
 # Prompt 2 What to do with the FlashCard Set
 def setAction():
+    print("--------------------------------------------------------")
     print("\nNow what would you like to do?\n"
           "1) Read the file \n"
           "2) Add to the file\n"
           "3) Delete from the file\n"
           "4) Test yourself\n"
-          "5) Quit ")
-    return raw_input()
+          "0) Quit ")
+    choice = raw_input("Input: ")
+    print("--------------------------------------------------------")
+    return choice
 
 
 def printWords(fileName):
@@ -201,21 +218,17 @@ def printWords(fileName):
 
     # It'll be the max chars long + 5 on each side
     # wordLength = max(len(key.split()) for key in wordDict.keys())
-
-    #print('-' * 101)
-    print ("+ {:-<6s} + {:-<25s} + {:-<75s}+".format("-","-","-"))
-    print ("| {:<6s} | {:<25s} | {:<75s}|".format("INDEX", "WORD", "DEFINITION"))
-    #print('-' * 101)
-    print ("+ {:-<6s} + {:-<25s} + {:-<75s}+".format("-", "-", "-"))
+    print("\n")
+    print ("+ {:-<6s} + {:-<25s} + {:-<100s}+".format("-","-","-"))
+    print ("| {:<6s} | {:<25s} | {:<100s}|".format("INDEX", "WORD", "DEFINITION"))
+    print ("+ {:-<6s} + {:-<25s} + {:-<100s}+".format("-", "-", "-"))
 
     for index in range(1,len(wordList)):
-
-        print("| {:<6d} | {:<25s} | {:<75s}|".format(index, wordList[index], wordDict[wordList[index]]))
-        print("+ {:.<6s} + {:.<25s} + {:.<75s}+".format(".",".","."))
-        #print('- ' * 51 + '-')
-        #print("| {:<8s} | {:<20s} | {:<65s}|".format("","",""))
+        print("| {:<6d} | {:<25s} | {:<100s}|".format(index, wordList[index], wordDict[wordList[index]]))
+        print("+ {:.<6s} + {:.<25s} + {:.<100s}+".format(".",".","."))
         index+=1
-    #print('=' * 103)
+    print("\n")
+
 
 # Prompt 2 Selection 1 Read the File
 def readFile(fileName):
@@ -224,49 +237,70 @@ def readFile(fileName):
 
 # Prompt 2 Selection 2 Add to the File
 def addToFile(fileName):
-    openFile = open(fileName, "a")
+    #openFile = open(fileName, "a")
 
     # While user wants to keep adding words, ask for word and its definition
     while (True):
-        word = raw_input("What word/phrase would you like to add? ")
-        definition = raw_input("What is its definition? ")
+        print("\nWhat word/phrase would you like to add? ")
+        word = raw_input("Input: ")
+        print("\nWhat is its definition? ")
+        definition = raw_input("Input: ")
 
-        # Confirm word and definition
-        print("\nJust to confirm, your word is:\n"
-              "\t%s\n"
-              "and its definition is:\n"
-              "\t%s\n" % (word, definition))
+        openFile = open(fileName, "r")
+        # Use Regular Expression to differentiate between new word and its definition
+        words = re.split(":|\n", openFile.read())
+        openFile.close()
+        new_def = ""
+        for i in range(len(words) - 1):
+            if (i % 2 == 0):
+                if (words[i] == word):
+                    print("\nIt seems you already have this word! The current definition is already: ")
+                    print(words[i + 1])
+                    print("\nDo you want to:\n"
+                            "1) Use this definition\n"
+                            "2) Use the new definition\n"
+                            "3) Add the new definition to the current definition")
+                    def_choice = raw_input("Input: ")
+                    if (def_choice == '1'):
+                        new_def = None
+                        break
+                    elif (def_choice == '2'):
+                        new_def = definition
+                        break
+                    elif (def_choice == '3'):
+                        new_def = words[i+1] + " | " + definition
+                        break
 
-        # Decide to add changes, redo changes, or exit
-        print("Press 1 to add these changes\n"
-              "Press 2 to redo\n"
-              "Press 3 to exit")
-
-        addChanges = raw_input()
-
-        # Add changes
-        if (addChanges == '1'):
-            openFile.write(word + ":" + definition + '\n')
-            addAnother = raw_input("Press 1 to add another word\n"
-                                   "Press 2 to exit ")
-
-            # Add another word
-            if (addAnother == '1'):
-                continue
-
-            # Exit if it's not 1
+        # If there is something to add            
+        if (new_def != None):
+            
+            # if it's not a duplicated word, then just add it. Otherwise write a new definition for the word
+            if (new_def == ""):
+                openFile = open(fileName, "a")
+                openFile.write(word + ":" + definition + "\n")
             else:
-                break
 
+                # Gets all lines
+                with open(fileName, "r") as openFile:
+                    lines = openFile.readlines()
+                # Will write all words in "lines" if the line isn't the one to delete
+                with open(fileName, "w") as openFile:
+                    for line in lines:
+                        if not line.lower().startswith(word.lower()):
+                            openFile.write(line)
+                        else:
+                            openFile.write(word + ":" + new_def + "\n")
+                openFile.close()
+        print("\nPress 1 to add another word\n"
+              "Press 2 to exit ")
+        addAnother = raw_input("Input: ")
 
-        # Redo changes
-        elif (addChanges == '2'):
+        # Add another word
+        if (addAnother == '1'):
             continue
 
-
-        # Exit
-        elif (addChanges == '3'):
-            openFile.close()
+        # Exit if it's not 1
+        else:
             break
 
     openFile.close()
@@ -275,12 +309,13 @@ def addToFile(fileName):
 # Prompt 2 Selection 3 Delete from the File
 def deleteFromFile(fileName):
     printWords(fileName)
-    toDelete = raw_input("Which word would you like to delete? (Enter index or name)\n"
-                         "Enter 0 to exit ")
+    print("Which word would you like to delete? (Enter index or name)\n"
+          "Enter 0 to exit")
+    toDelete = raw_input("Input: ")
 
     openFile = open(fileName, "r")
     # Use Regular Expression to differentiate between new word and its definition
-    words = re.split(":|\n|''", openFile.read())
+    words = re.split(":|\n", openFile.read())
     openFile.close()
 
     wordList = ["0"]
@@ -299,17 +334,19 @@ def deleteFromFile(fileName):
     if (toDelete == '0'):
         print("You chose to exit!")
 
-    elif (toDelete in wordList):
+    # input is the word itself
+    elif (caseInsensitiveContain(toDelete, wordList) != None):
         # Gets all lines
         with open(fileName, "r") as openFile:
             lines = openFile.readlines()
         # Will write all words in "lines" if the line isn't the one to delete
         with open(fileName, "w") as openFile:
             for line in lines:
-                if not line.lower().startswith(toDelete.lower()):
+                if not line.lower().startswith(toDelete.lower()+":"):
                     openFile.write(line)
         openFile.close()
 
+    # input is (possibly) the index of the word
     else:
         try:
             if toDelete in str(range(len(wordList))):
@@ -336,7 +373,7 @@ def deleteFromFile(fileName):
 def testFile(fileName):
     openFile = open(fileName, "r")
     # Use Regular Expression to differentiate between new word and its definition
-    words = re.split(":|\n|''", openFile.read())
+    words = re.split(":|\n", openFile.read())
     wordDict = {}
 
     for i in range(len(words) - 1):
@@ -346,28 +383,37 @@ def testFile(fileName):
 
     items = wordDict.items()
     random.shuffle(items)
-    print("For each word, enter what you think the definition is\n"
-          "If you want to exit, enter 1")
-    print("-----------------------------------------------------\n")
+    print("\nFor each word, enter what you think the definition is\n"
+          "If you want to exit, enter 0\n")
     for word, definition in items:
+        print("--------------------------------------------------------\n")
         print("The Word is: " + word)
 
-        # Will exit if user inputs 1
-        randomInput = raw_input()
-        if (randomInput == '1'):
+        # Will exit if user inputs 0
+        randomInput = raw_input("Input: ")
+        if (randomInput == '0'):
             break
 
         print("The Definition is: " + definition + '\n')
-        print("--------------------------------------\n")
+
 
     openFile.close()
+
+
+# helper method to see if an object is in a list, case insensitive
+# will return the correct case word in the list or "None" if it is not in the list
+def caseInsensitiveContain(given_object, given_list):
+    for current_object in given_list:
+        if (given_object.lower() == current_object.lower()):
+            return current_object
+    return None
 
 
 #               ===============MAIN METHOD=============
 if __name__ == "__main__":
     fileName = ""
-    print("Hello! Welcome to FlashCard Maker!")
-    print("--------------------------------------------------------")
+    print("Hello!\n" 
+          "Welcome to FlashCard Maker!")
     # while the user wants to continue to do things
     while (True):
         choice1 = intro()
@@ -381,23 +427,30 @@ if __name__ == "__main__":
         elif (choice1 == '2'):
             fileName = chooseSets()
 
+            # chooses to exit
             if (fileName == '0'):
                 print("You chose to exit!")
                 continue
-
-            # If the input isn't a txt file, then check to see if the input is a key
-            # If it is not a number, then it is not a valid input
-            # If it is not a string, then something got messed up somewhere
-            try:
-                if fileName in str(range(len(flashList))):
-                    fileName = flashList[int(fileName)]
-                else:
-                    print("Input is not valid!")
-                    continue
-            except ValueError:
-                print("Not a valid input!")
-            except TypeError:
-                print("Wrong type!")
+            
+            # input is the acutal filename
+            temporary = caseInsensitiveContain((fileName + ".txt"), flashList)
+            if (temporary != None):
+                fileName = temporary
+            else:
+                # If the input isn't a file, then check to see if the input is a number
+                # If it is not a number, then it is not a valid input
+                # If it is not a stri ng, then something got messed up somewhere
+                try:
+                    if fileName in str(range(len(flashList))):
+                        fileName = flashList[int(fileName)]
+                    else:
+                        print("Input is not valid!")
+                        continue
+                except ValueError:
+                    print("Not a valid input!")
+                except TypeError:
+                    print("Wrong type!")
+            
 
 
 
@@ -405,35 +458,44 @@ if __name__ == "__main__":
         elif (choice1 == '3'):
             fileName = renameSet()
 
-            # If the input isn't a txt file, then check to see if the input is a key
-            # If it is not a number, then it is not a valid input
-            # If it is not a string, then something got messed up somewhere
-            try:
-                if fileName in str(range(len(flashList))):
-                    fileName = flashList[int(fileName)]
-            except ValueError:
-                print("Not a valid input!")
-                continue
-            except TypeError:
-                print("Wrong type!")
-                continue
+            # input is the acutal filename
+            temporary = caseInsensitiveContain((fileName + ".txt"), flashList)
+            if (temporary != None):
+                fileName = temporary
+            else:
+                # If the input isn't a txt file, then check to see if the input is a key
+                # If it is not a number, then it is not a valid input
+                # If it is not a string, then something got messed up somewhere
+                try:
+                    if fileName in str(range(len(flashList))):
+                        fileName = flashList[int(fileName)]
+                except ValueError:
+                    print("Not a valid input!")
+                    continue
+                except TypeError:
+                    print("Wrong type!")
+                    continue
 
             # flashList[0] = '0' so it'll still exit
             if (fileName == '0'):
                 print("You chose to exit!")
 
             else:
-                newFileName = raw_input("What would you like to name your new file? (Don't add '.txt') ")
+                print("\nWhat would you like to name your new file?")
+                newFileName = raw_input("Input: ")
                 newFileName += ".txt"
-                confirm = raw_input("Are you sure?\n"
-                                    "1) yes\n"
-                                    "2) no, go back ")
+                print("\nAre you sure?\n"
+                      "1) yes\n"
+                      "2) no, go back")
+                confirm = raw_input("Input: ")
+                
                 if (confirm == '1'):
                     try:
                         os.rename(path + fileName, path + newFileName)
                         updateList(fileName, newFileName)
                     except OSError:
                         print ("Inputted file is invalid!")
+                
 
             # Go back to prompt 1
             continue
@@ -443,16 +505,21 @@ if __name__ == "__main__":
         elif (choice1 == '4'):
             fileName = deleteSet()
 
-            # check to see if the input is a key rather than the txt file
-            # If it is not a number, then it is not a valid input 
-            # If it is not a string, then something got messed up somewhere
-            try:
-                if fileName in str(range(len(flashList))):
-                    fileName = flashList[int(fileName)]
-            except ValueError:
-                print("Not a valid input!")
-            except TypeError:
-                print("Wrong type!")
+            # input is the acutal filename
+            temporary = caseInsensitiveContain((fileName + ".txt"), flashList)
+            if (temporary != None):
+                fileName = temporary
+            else:
+                # check to see if the input is a key rather than the txt file
+                # If it is not a number, then it is not a valid input 
+                # If it is not a string, then something got messed up somewhere
+                try:
+                    if fileName in str(range(len(flashList))):
+                        fileName = flashList[int(fileName)]
+                except ValueError:
+                    print("Not a valid input!")
+                except TypeError:
+                    print("Wrong type!")
 
             # flashList[0] = '0' so it'll still exit
             if (fileName == '0'):
@@ -460,9 +527,10 @@ if __name__ == "__main__":
                 continue
 
             else:
-                confirm = raw_input("Are you sure?\n"
-                                "1) yes\n"
-                                "2) no, go back ")
+                print("\nAre you sure?\n"
+                      "1) yes\n"
+                      "2) no, go back")
+                confirm = raw_input("Input: ")
                 if (confirm == '1'):
                     try:
                         os.remove(path + fileName)
@@ -472,9 +540,9 @@ if __name__ == "__main__":
 
             continue
 
-        # P1S5: exit the program
-        elif (choice1 == '5'):
-            print("Goodbye!")
+        # P1S0: exit the program
+        elif (choice1 == '0'):
+            print("\nGoodbye!\n")
             break
 
         # If fileName doesn't end with .txt, then don't continue
@@ -501,24 +569,17 @@ if __name__ == "__main__":
             elif (choice2 == '4'):
                 testFile(flashPath)
 
-            # P2S5: exit prompt 2 to go back to prompt 1
-            elif (choice2 == '5'):
+            # P2S0: exit prompt 2 to go back to prompt 1
+            elif (choice2 == '0'):
                 print("Exiting!")
                 break
 
 
-# Create a method that will check to see if an added word already exists and see if you want to
-# overwrite the old def with a new def, add to the new def, or create a separate def for the same word
 
 # specify if you want the word then get def, def then get word, multiple choice, etc.
 
-# Deleting words might have some bugs
-
 # if you input the beginning of a file, then return all files that start with the same input
 # ex: if you input h then it'll output all files that start with h
-
-# make spacings (input and print) consistent and clean
-
 
 # make variable names better
 
@@ -532,9 +593,11 @@ if __name__ == "__main__":
 
 # make the table responsive to the input length, create multiple lines if possible
 
-#Currently when you input the name of the file, it won't go
-# it only checks for the number value
-# change it so that you just need to insert the name of the project
-# its better to take out .txt from print because it'd confused the user!!!
-
 # make everything case insensitive (for prompt 1 regarding files)
+
+# corner case of input of nothing (enter nothing instead of an actual valye or a number )
+
+# deleting a set only works with the name, not with the number
+
+# make all quits or exits available and "0" 
+# have a "go back" function instead of all these confirmations!!!
